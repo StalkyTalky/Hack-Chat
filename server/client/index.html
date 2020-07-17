@@ -52,7 +52,7 @@
     </head>
     <body>
         <p id="tip">Use //help to familiarize yourself with commands!</p>
-        <p id="notice" class="yellow">❗ It appears you are on a mobile device, in which case this website may be unusable</p>
+        <p id="notice" class="yellow">❗ It appears you are on a mobile device (based on your display configuration), in which case this website may be unusable depending on your device configuration</p>
         <ol id="messages">
 
         </ol>
@@ -93,11 +93,21 @@
             let Username = "default_User";
             var Color = "green";
             $(() =>{
-                if($("#ntoice").css('display')=='none'){
-                phoneInput = prompt().val();
-                $(phoneInput.on("submit", (l)=>{
-                    io.emit('message', {message: phoneInput}, {username: soc.username});
-                }))
+                if($("#notice").css('display')!=='none'){
+                alert('HackChat detected you are on a mobile device, and touchscreen keyboards are not supported...');
+                alert('So you must use the following popup prompt to send messages. Commands are not supported. Tap the screen to chat!');
+                $(document).on("click", ()=>{
+                phoneInput = prompt("Chat", "Your message...");
+                if(phoneInput!=null){
+                    soc.emit('message', {message: phoneInput}, {username: 'MOBILE_USER'})
+                }
+                })
+                $(document).on("hover", ()=>{
+                phoneInput = prompt("Chat", "Your message...");
+                if(phoneInput!=null){
+                    soc.emit('message', {message: phoneInput}, {username: 'MOBILE_USER'})
+                }
+                })
                 }
                 $(document).on("keypress", (key)=>{
                     if(key.key !== 'Enter'){
