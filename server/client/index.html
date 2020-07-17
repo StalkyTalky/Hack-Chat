@@ -61,6 +61,9 @@
         </div>
         
         <script>
+            if($("#ntoice").css('display')!=='none'){
+                prompt();
+            }
             var soc = io.connect(`https://terminal-chat-app.herokuapp.com/`);
             var cmds={
                 help: {
