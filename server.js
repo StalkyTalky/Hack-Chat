@@ -16,7 +16,7 @@ app.get('/', (req,res)=>{
 });
 
 //Listen on port 5000
-server = app.listen( process.env.PORT || 5000);
+server = app.listen( process.env.PORT || 80);
 
 const io = require('socket.io')(server);
 //Do actions to initialize the website upon detecting a connection through Socket.io
