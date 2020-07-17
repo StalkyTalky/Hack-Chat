@@ -61,9 +61,6 @@
         </div>
         
         <script>
-            if($("#ntoice").css('display')!=='none'){
-                prompt();
-            }
             var soc = io.connect(`https://terminal-chat-app.herokuapp.com/`);
             var cmds={
                 help: {
@@ -96,6 +93,12 @@
             let Username = "default_User";
             var Color = "green";
             $(() =>{
+                if($("#ntoice").css('display')=='none'){
+                phoneInput = prompt().val();
+                $(phoneInput.on("submit", (l)=>{
+                    io.emit('message', {message: phoneInput}, {username: soc.username});
+                }))
+                }
                 $(document).on("keypress", (key)=>{
                     if(key.key !== 'Enter'){
                         $("#type").append(key.key);
