@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/css2?family=Sarpanch:wght@800&display=swap" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <title>Chat website</title>
+        <style>
+            *{
+                background-color: black;
+                color: #38ff60;
+                font-family: 'Sarpanch', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                overflow: hidden;
+                margin: 0px;
+                padding: 0px;
+            }
+            #blue{
+                color: rgb(24, 0, 161);
+            }
+            p{
+                width: 99vw;
+            }
+            #MessageBox{
+                margin-bottom: 2vh;
+                margin-top: 1vh;
+            }
+        </style>
+    </head>
+    <body>
+        <p>Use //help to familiarize yourself with commands!</p>
+        <ol id="messages">
+
+        </ol>
+        <div id="MessageBox">
+            <p id="prompt">Type something $><span id="type"><span></p>
+        </div>
+        
+        <script>
+            portNum = 5000;
+            var soc = io.connect(`http://localhost:${portNum}`);
+            var cmds={
+                help: {
+                    trigger:"help",
+                    explain:"Run this command to either display all commands, or get an in-detail explanation of a singular command",
+                    run: function help(){
+                        for(i in cmds){
+                            $("#messages").append(`<li style="list-style: none;"><span id="blue">${cmds[i].trigger}</span>: ${cmds[i].explain}</li>`);
+                        }
+                    }
+                },
+                setusername: {
+                    trigger:"setusername",
+                    explain:"Run this command to change your username. Parameter(s): (NAME)",
+                    run: function changeName(){
+                        let input=$("#type").text().split("//");
+                        soc.emit('change_username', {nickName: input[1].split(" ").pop().substr(0,10)});
+                    }
+                },
+                test: {
+                    trigger:"t",
+                    explain: null,
+                    run: ()=>{
+                        console.log('success')
+                    }
+                }
+            }
+            let a="//otherworldly creatures".split("//");
+            console.log(a[1].split(" ")[0]);
+            let Username = "default_User";
+            var Color = "green";
+            $(() =>{
+                $(document).on("keypress", (key)=>{
+                    if(key.key !== 'Enter'){
+                        $("#type").append(key.key);
+                    } else{
+                        if($("#type").text().substr(0,2) == "//"){
+                         for(i in cmds){
+                            let input=$("#type").text().split("//");
+                            if(input[1].split(" ")[0] == cmds[i].trigger){
+                                cmds[i].run();
+                                $("#type").text(null);
+                                return;
+                            }
+                         }
+                         $("#messages").append('<li style="list-style: none;"> Invalid command ☹</li>');
+                         $("#type").text(null);
+                        } else{
+                            if($("#type").text() !== ""){
+                            soc.emit('message', {message: $("#type").text()}, {username: Username});
+                            $("#type").text(null);
+                            }
+                        }
+
+                        }
+                        
+                    }
+                )
+                $(document).on("keydown", (key)=>{
+                    if(key.keyCode == 8){
+                        $("#type").text($("#type").text().substr(0, $("#type").text().length-1))
+                    }
+                })
+                soc.on('message', (data)=>{
+                    $("#messages").append(`<li style="list-style: none;">$_${data.username} says :: ${data.message}</li>`);
+                    $(document).scrollTop($(document).height()); 
+                })
+                soc.on('newJoin', (data)=>{
+                    $("#messages").append(`<li style="list-style: none;">🟢 Somebody has joined the room!</li>`)
+                });
+            })
+        </script>
+    </body>
+</html>
