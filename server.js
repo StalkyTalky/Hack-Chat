@@ -65,4 +65,7 @@ io.on('connection', (socket) =>{
     socket.on('commandOutput', (data) =>{
         io.sockets.emit('commandOut', {CMDmessage: data.cmdMessage});
     });
+    socket.on('id_store', (data)=>{
+        socket.username = `MOBILE_USER_`+data.mobileid;
+    });
 });
