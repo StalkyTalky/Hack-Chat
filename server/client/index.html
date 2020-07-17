@@ -36,8 +36,7 @@
         </div>
         
         <script>
-            portNum = 5000;
-            var soc = io.connect(`http://localhost:${portNum}`);
+            var soc = io.connect(`https://terminal-chat-app.herokuapp.com:5000`);
             var cmds={
                 help: {
                     trigger:"help",
