@@ -12,11 +12,16 @@ app.use(express.static('public'));
 
 //routes
 app.get('/', (req,res)=>{
-    res.sendFile(__dirname + 'server/client/index.html');
+    res.sendFile(__dirname + '/server/client/index.html');
 });
 
-//Listen on port 5000
-server = app.listen( process.env.PORT || 80);
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 8000;
+}
+
+
+server = app.listen(port);
 
 const io = require('socket.io')(server);
 //Do actions to initialize the website upon detecting a connection through Socket.io
