@@ -12,7 +12,7 @@ app.use(express.static('public'));
 
 //routes
 app.get('/', (req,res)=>{
-    res.sendFile(__dirname + '/server/client/index.html');
+    res.sendFile(__dirname + '/index.html');
 });
 
 let port = process.env.PORT;
@@ -38,6 +38,9 @@ io.on('connection', (socket) =>{
         users.push({id, username: socket.username});
     });
     socket.on('message', (data) => {
+        if({message}.substr(0,2) == "//"){
+            io.socket.emit('CMDmessage', {feedback: 'Test succeeded'});
+        }
         io.sockets.emit('message', {message: data.message, username : socket.username});
     });
     socket.on('disconnect', data =>{
