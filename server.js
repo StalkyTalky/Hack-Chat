@@ -59,7 +59,7 @@ io.on('connection', (socket) =>{
         socket.username = `MOBILE_USER_`+data.mobileid;
     });
     socket.on('oldJoin', (data)=>{
-        io.sockets.emit('oldJoin', {user: socket.username});
+        io.sockets.emit('oJoin', {user: socket.username});
     });
-    sockets.on('newJoin', ()=>io.sockets.emit('newJoin'));
+    sockets.on('newJoin', ()=>io.sockets.emit('nJoin'));
 });

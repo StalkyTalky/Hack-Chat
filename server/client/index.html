@@ -188,11 +188,11 @@
                     `<li style="list-style: none;">$_${data.username} says :: ${data.message}</li>`);
                 $(document).scrollTop($(document).height());
             })
-            soc.on('newJoin', (data) => {
+            soc.on('nJoin', (data) => {
                 $("#messages").append(
                     `<li style="list-style: none;">🟡 Somebody new has joined the room!</li>`)
             });
-            soc.on('oldJoin', (data) => {
+            soc.on('oJoin', (data) => {
                 $("#messages").append(
                     `<li style="list-style: none;">🟢 ${data.user} has joined the room!</li>`)
             })
