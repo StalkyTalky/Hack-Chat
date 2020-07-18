@@ -1,156 +1,207 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <link href="https://fonts.googleapis.com/css2?family=Teko:wght@700&display=swap" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
-        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-        <title>Chat website</title>
-        <style>
-            *{
-                background-color: black;
-                color: #38ff60;
-                font-family: 'Teko', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-                overflow: hidden;
-                margin: 0px;
-                padding: 0px;
-            }
-            .blue{
-                color: rgb(71, 243, 255);
-            }
-            .darkblue{
-                color: rgb(36, 36, 150);
-            }
-            .red{
-                color: rgb(255, 66, 66);
-            }
-            .darkred{
-                color: rgb(133, 46, 46);
-            }
-            .yellow{
-                color: rgb(255, 255, 68);
-            }
-            .darkyellow{
-                color: rgb(165, 165, 52);
-            }
-            .darkgreen{
-                color: #1e8633;
-            }
-            p{
-                width: 99vw;
-            }
-            #MessageBox{
-                margin-bottom: 2vh;
-                margin-top: 1vh;
-            }
-            #notice{
-                display: none;
-            }
-            @media only screen and (max-width: 30cm) {
-            #notice { display: block; }
-            }
-        </style>
-    </head>
-    <body>
-        <p id="tip">Use //help to familiarize yourself with commands!</p>
-        <p id="notice" class="yellow">❗ It appears you are on a mobile device (based on your display configuration), in which case this website may be unusable depending on your device configuration</p>
-        <ol id="messages">
 
-        </ol>
-        <div id="MessageBox">
-            <p id="prompt">Type something $><span id="type"><span></p>
-        </div>
-        
-        <script>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <title>Chat website</title>
+    <style>
+        * {
+            background-color: black;
+            color: #38ff60;
+            font-family: 'Teko', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            overflow: hidden;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .blue {
+            color: rgb(71, 243, 255);
+        }
+
+        .darkblue {
+            color: rgb(36, 146, 150);
+        }
+
+        .red {
+            color: rgb(255, 66, 66);
+        }
+
+        .darkred {
+            color: rgb(133, 46, 46);
+        }
+
+        .yellow {
+            color: rgb(255, 255, 68);
+        }
+
+        .darkyellow {
+            color: rgb(165, 165, 52);
+        }
+
+        .darkgreen {
+            color: #1e8633;
+        }
+
+        p {
+            width: 99vw;
+        }
+
+        #MessageBox {
+            margin-bottom: 2vh;
+            margin-top: 1vh;
+        }
+
+        #notice {
+            display: none;
+        }
+
+        @media only screen and (max-width: 30cm) {
+            #notice {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <p id="tip">Use //help to familiarize yourself with commands!</p>
+    <p id="notice" class="yellow">❗ It appears you are on a mobile device (based on your display configuration), in
+        which case this website may be unusable depending on your device configuration</p>
+    <ol id="messages">
+
+    </ol>
+    <div id="MessageBox">
+        <p id="prompt">Type something $><span id="type"><span></p>
+    </div>
+
+    <script>
+        var cmds = {
+            help: {
+                trigger: "help",
+                explain: "Run this command to either display all commands, or get an in-detail explanation of a singular command",
+                run: function help() {
+                    for (i in cmds) {
+                        $("#messages").append(
+                            `<li style="list-style: none;"><span class="blue">${cmds[i].trigger}</span>: ${cmds[i].explain}</li>`
+                            );
+                    }
+                }
+            },
+            setusername: {
+                trigger: "setusername",
+                explain: "Run this command to change your username. Parameter(s): (NAME)",
+                run: function changeName() {
+                    let input = $("#type").text().split("//");
+                    soc.emit('change_username', {
+                        nickName: input[1].split(" ").pop().substr(0, 10)
+                    });
+                    Cookies.set('username', `${input[1].split(" ").pop().substr(0,10)}`);
+                }
+            },
+            test: {
+                trigger: "t",
+                explain: null,
+                run: () => {
+                    console.log('success')
+                }
+            }
+        }
+        let Username = "default_User";
+        var Color = "green";
+        $(() => {
             var soc = io.connect(`https://terminal-chat-app.herokuapp.com/`);
-            var cmds={
-                help: {
-                    trigger:"help",
-                    explain:"Run this command to either display all commands, or get an in-detail explanation of a singular command",
-                    run: function help(){
-                        for(i in cmds){
-                            $("#messages").append(`<li style="list-style: none;"><span class="blue">${cmds[i].trigger}</span>: ${cmds[i].explain}</li>`);
+            if (Cookies.get('username') !== undefined) {
+                soc.emit('change_username', {
+                    nickName: Cookies.get('username').substr(0, 10)
+                })
+                soc.emit('oldJoin');
+            } else {
+                soc.emit('newJoin');
+            }
+            let identifier = "";
+            if ($("#notice").css('display') !== 'none') {
+                for (let i = 0; i < 10; i++) {
+                    identifier += Math.floor(Math.random() * 10).toString();
+                }
+                soc.emit('mobileID', {
+                    mobileid: identifier
+                });
+                alert(
+                    'HackChat detected you are on a mobile device, and touchscreen keyboards are not supported...');
+                alert(
+                    'So you must use the following popup prompt to send messages. Commands are not supported. Tap the screen to chat!');
+                soc.emit('change_username', {
+                    nickName: `MOBILE_USER_${soc.id}`
+                })
+                $(document).on("click", () => {
+                    if ($("#notice").css('display') !== 'none') {
+                        let phoneInput = prompt("Chat", "Your message...");
+                        if (phoneInput != null) {
+                            soc.emit('message', {
+                                message: phoneInput
+                            }, {
+                                username: `MOBILE_USER_${identifier}`
+                            })
                         }
                     }
-                },
-                setusername: {
-                    trigger:"setusername",
-                    explain:"Run this command to change your username. Parameter(s): (NAME)",
-                    run: function changeName(){
-                        let input=$("#type").text().split("//");
-                        soc.emit('change_username', {nickName: input[1].split(" ").pop().substr(0,10)});
-                    }
-                },
-                test: {
-                    trigger:"t",
-                    explain: null,
-                    run: ()=>{
-                        console.log('success')
-                    }
-                }
-            }
-            let Username = "default_User";
-            var Color = "green";
-            $(() =>{
-                let identifier="";
-                if($("#notice").css('display')!=='none'){
-                for(let i=0;i<10;i++){
-                    identifier+= Math.floor(Math.random() * 10).toString();
-                }
-                soc.emit('mobileID', {mobileid: identifier});
-                alert('HackChat detected you are on a mobile device, and touchscreen keyboards are not supported...');
-                alert('So you must use the following popup prompt to send messages. Commands are not supported. Tap the screen to chat!');
-                soc.emit('change_username', {nickName: `MOBILE_USER_${soc.id}`})
-                $(document).on("click", ()=>{
-                if($("#notice").css('display')!=='none'){
-                    let phoneInput = prompt("Chat", "Your message...");
-                    if(phoneInput!=null){
-                    soc.emit('message', {message: phoneInput}, {username: `MOBILE_USER_${identifier}`})
-                }
-                }
                 })
-                }
-                $(document).on("keypress", (key)=>{
-                    if(key.key !== 'Enter'){
-                        $("#type").append(key.key);
-                    } else{
-                        if($("#type").text().substr(0,2) == "//"){
-                         for(i in cmds){
-                            let input=$("#type").text().split("//");
-                            if(input[1].split(" ")[0] == cmds[i].trigger){
+            }
+            $(document).on("keypress", (key) => {
+                if (key.key !== 'Enter') {
+                    $("#type").append(key.key);
+                } else {
+                    if ($("#type").text().substr(0, 2) == "//") {
+                        for (i in cmds) {
+                            let input = $("#type").text().split("//");
+                            if (input[1].split(" ")[0] == cmds[i].trigger) {
                                 cmds[i].run();
                                 $("#type").text(null);
                                 return;
                             }
-                         }
-                         $("#messages").append('<li style="list-style: none;"> Invalid command ☹</li>');
-                         $("#type").text(null);
-                        } else{
-                            if($("#type").text() !== ""){
-                            soc.emit('message', {message: $("#type").text()}, {username: Username});
+                        }
+                        $("#messages").append('<li style="list-style: none;"> Invalid command ☹</li>');
+                        $("#type").text(null);
+                    } else {
+                        if ($("#type").text() !== "") {
+                            soc.emit('message', {
+                                message: $("#type").text()
+                            }, {
+                                username: Username
+                            });
                             $("#type").text(null);
-                            }
                         }
+                    }
 
-                        }
-                        
-                    }
-                )
-                $(document).on("keydown", (key)=>{
-                    if(key.keyCode == 8){
-                        $("#type").text($("#type").text().substr(0, $("#type").text().length-1))
-                    }
-                })
-                soc.on('message', (data)=>{
-                    $("#messages").append(`<li style="list-style: none;">$_${data.username} says :: ${data.message}</li>`);
-                    $(document).scrollTop($(document).height()); 
-                })
-                soc.on('newJoin', (data)=>{
-                    $("#messages").append(`<li style="list-style: none;">🟢 Somebody has joined the room!</li>`)
-                });
-                soc.on('left', (data)=>{
-                    $("#messages").append(`<li style="list-style: none;">🔴 ${data.user} has left the room!</li>`);
-                })
+                }
+
             })
-        </script>
-    </body>
+            $(document).on("keydown", (key) => {
+                if (key.keyCode == 8) {
+                    $("#type").text($("#type").text().substr(0, $("#type").text().length - 1))
+                }
+            })
+            soc.on('message', (data) => {
+                $("#messages").append(
+                    `<li style="list-style: none;">$_${data.username} says :: ${data.message}</li>`);
+                $(document).scrollTop($(document).height());
+            })
+            soc.on('newJoin', (data) => {
+                $("#messages").append(
+                    `<li style="list-style: none;">🟡 Somebody new has joined the room!</li>`)
+            });
+            soc.on('oldJoin', (data) => {
+                $("#messages").append(
+                    `<li style="list-style: none;">🟢 ${data.user} has joined the room!</li>`)
+            })
+            soc.on('left', (data) => {
+                $("#messages").append(
+                    `<li style="list-style: none;">🔴 ${data.user} has left the room!</li>`);
+            })
+        })
+    </script>
+</body>
+
 </html>

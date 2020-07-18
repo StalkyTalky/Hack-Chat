@@ -27,26 +27,16 @@ const io = require('socket.io')(server);
 //Do actions to initialize the website upon detecting a connection through Socket.io
 io.on('connection', (socket) =>{
     console.log('A connection has been made');
-    io.sockets.emit('newJoin');
     //Add the current connection to the connections array
     connections.push(socket);
-    //Randomize a color
-    let color = randomColor();
 
     //Set the username for the connection
-    socket.username = 'DEFAULT';
-    socket.color = color;
-
     socket.on('change_username', data =>{
         let id = uuid.v4();
         socket.id = id;
-        socket.username = data.nickName;
+        socket.username = data.nickName.substr(0,10);
         users.push({id, username: socket.username});
-        updateUsernames();
     });
-    const updateUsernames = () =>{
-        io.sockets.emit('get users', users);
-    };
     socket.on('message', (data) => {
         io.sockets.emit('message', {message: data.message, username : socket.username});
     });
@@ -68,4 +58,8 @@ io.on('connection', (socket) =>{
     socket.on('id_store', (data)=>{
         socket.username = `MOBILE_USER_`+data.mobileid;
     });
+    socket.on('oldJoin', (data)=>{
+        io.sockets.emit('oldJoin', {user: socket.username});
+    });
+    sockets.on('newJoin', ()=>io.sockets.emit('newJoin'));
 });
