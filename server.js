@@ -51,7 +51,7 @@ io.on('connection', (socket) =>{
         io.sockets.emit('message', {message: data.message, username : socket.username});
     });
     socket.on('disconnect', data =>{
-
+        io.sockets.emit('left', {user: socket.username});
         if(!socket.username){
             return;
         }
