@@ -78,7 +78,7 @@
     </div>
 
     <script>
-        var soc = io.connect(`https://terminal-chat-app.herokuapp.com/`);
+        var soc = io.connect(`http://localhost:5000`);
         var cmds = {
             help: {
                 trigger: "help",
@@ -199,6 +199,9 @@
             soc.on('left', (data) => {
                 $("#messages").append(
                     `<li style="list-style: none;">🔴 ${data.user} has left the room!</li>`);
+            })
+            soc.on('CMDmessage', (data)=>{
+                <li style="list-style: none;">🔵COMMAND: ${data.feedback}</li>
             })
         })
     </script>
