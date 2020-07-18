@@ -117,7 +117,7 @@
                 soc.emit('change_username', {
                     nickName: Cookies.get('username').substr(0, 10)
                 })
-                soc.emit('oldJoin', {user=Cookies.get('username').substr(0, 10)});
+                soc.emit('oldJoin', {user: Cookies.get('username')});
             } else {
                 soc.emit('newJoin');
             }
