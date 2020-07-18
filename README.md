@@ -1,5 +1,7 @@
 # HackChat
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6827e40b364e4383970c9093b82c2f71)](https://app.codacy.com/manual/mahmoudahmed20102223/StalkyTalky.github.io?utm_source=github.com&utm_medium=referral&utm_content=StalkyTalky/StalkyTalky.github.io&utm_campaign=Badge_Grade_Settings)
+
 A very cool chat project™.
 
 ## Planned Features List:
