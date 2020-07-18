@@ -78,6 +78,7 @@
     </div>
 
     <script>
+        var soc = io.connect(`https://terminal-chat-app.herokuapp.com/`);
         var cmds = {
             help: {
                 trigger: "help",
@@ -112,7 +113,6 @@
         let Username = "default_User";
         var Color = "green";
         $(() => {
-            var soc = io.connect(`https://terminal-chat-app.herokuapp.com/`);
             if (Cookies.get('username') !== undefined) {
                 soc.emit('change_username', {
                     nickName: Cookies.get('username').substr(0, 10)
