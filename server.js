@@ -61,5 +61,5 @@ io.on('connection', (socket) =>{
     socket.on('oldJoin', (data)=>{
         io.sockets.emit('oJoin', {user: socket.username});
     });
-    sockets.on('newJoin', ()=>io.sockets.emit('nJoin'));
+    socket.on('newJoin', ()=>io.sockets.emit('nJoin'));
 });
