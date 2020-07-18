@@ -44,6 +44,9 @@
         .darkgreen {
             color: #1e8633;
         }
+        .undefined {
+            color: rgb(117, 146, 69);
+        }
 
         p {
             width: 99vw;
@@ -78,38 +81,7 @@
     </div>
 
     <script>
-        var soc = io.connect(`https://terminal-chat-app.herokuapp.com/`);
-        var cmds = {
-            help: {
-                trigger: "help",
-                explain: "Run this command to either display all commands, or get an in-detail explanation of a singular command",
-                run: function help() {
-                    for (i in cmds) {
-                        $("#messages").append(
-                            `<li style="list-style: none;"><span class="blue">${cmds[i].trigger}</span>: ${cmds[i].explain}</li>`
-                            );
-                    }
-                }
-            },
-            setusername: {
-                trigger: "setusername",
-                explain: "Run this command to change your username. Parameter(s): (NAME)",
-                run: function changeName() {
-                    let input = $("#type").text().split("//");
-                    soc.emit('change_username', {
-                        nickName: input[1].split(" ").pop().substr(0, 10)
-                    });
-                    Cookies.set('username', `${input[1].split(" ").pop().substr(0,10)}`);
-                }
-            },
-            test: {
-                trigger: "t",
-                explain: null,
-                run: () => {
-                    console.log('success')
-                }
-            }
-        }
+        var soc = io.connect(`http://localhost:8000`);
         let Username = "default_User";
         var Color = "green";
         $(() => {
@@ -117,28 +89,29 @@
                 soc.emit('change_username', {
                     nickName: Cookies.get('username').substr(0, 10)
                 })
-                soc.emit('oldJoin', {user: Cookies.get('username')});
+                soc.emit('oldJoin', {
+                    user: Cookies.get('username')
+                });
             } else {
                 soc.emit('newJoin');
             }
             let identifier = "";
             if ($("#notice").css('display') !== 'none') {
-                for (let i = 0; i < 10; i++) {
+                for (let i = 0; i < 6; i++) {
                     identifier += Math.floor(Math.random() * 10).toString();
                 }
-                soc.emit('mobileID', {
-                    mobileid: identifier
-                });
                 alert(
-                    'HackChat detected you are on a mobile device, and touchscreen keyboards are not supported...');
+                    'HackChat detected you are on a mobile device, and touchscreen keyboards are not supported...'
+                    );
                 alert(
-                    'So you must use the following popup prompt to send messages. Commands are not supported. Tap the screen to chat!');
-                soc.emit('change_username', {
+                    'So you must use the following popup prompt to send messages. Commands are not supported. Tap the screen to chat!'
+                    );
+                soc.emit('mobile_username', {
                     nickName: `MOBILE_USER_${soc.id}`
                 })
                 $(document).on("click", () => {
                     if ($("#notice").css('display') !== 'none') {
-                        let phoneInput = prompt("Chat", "Your message...");
+                        let phoneInput = prompt("Chat", "");
                         if (phoneInput != null) {
                             soc.emit('message', {
                                 message: phoneInput
@@ -150,21 +123,10 @@
                 })
             }
             $(document).on("keypress", (key) => {
-                if (key.key !== 'Enter') {
-                    $("#type").append(key.key);
-                } else {
-                    if ($("#type").text().substr(0, 2) == "//") {
-                        for (i in cmds) {
-                            let input = $("#type").text().split("//");
-                            if (input[1].split(" ")[0] == cmds[i].trigger) {
-                                cmds[i].run();
-                                $("#type").text(null);
-                                return;
-                            }
-                        }
-                        $("#messages").append('<li style="list-style: none;"> Invalid command ☹</li>');
-                        $("#type").text(null);
+                    if (key.key !== 'Enter') {
+                        $("#type").append(key.key);
                     } else {
+
                         if ($("#type").text() !== "") {
                             soc.emit('message', {
                                 message: $("#type").text()
@@ -177,7 +139,7 @@
 
                 }
 
-            })
+            )
             $(document).on("keydown", (key) => {
                 if (key.keyCode == 8) {
                     $("#type").text($("#type").text().substr(0, $("#type").text().length - 1))
@@ -190,15 +152,26 @@
             })
             soc.on('nJoin', (data) => {
                 $("#messages").append(
-                    `<li style="list-style: none;">🟡 Somebody new has joined the room!</li>`)
+                    `<li style="list-style: none;">🟡 Somebody new has joined the room!</li>`);
+                    $(document).scrollTop($(document).height());
             });
             soc.on('oJoin', (data) => {
                 $("#messages").append(
-                    `<li style="list-style: none;">🟢 ${data.user} has joined the room!</li>`)
+                    `<li style="list-style: none;">🟢 ${data.user} has joined the room!</li>`);
+                    $(document).scrollTop($(document).height());
             })
             soc.on('left', (data) => {
                 $("#messages").append(
                     `<li style="list-style: none;">🔴 ${data.user} has left the room!</li>`);
+                    $(document).scrollTop($(document).height());
+            })
+            soc.on('CMDmessage', (data) => {
+                console.log(data.color);
+                $("#messages").append(`<li class="${data.color}" style="list-style: none;">🔷SYS_COMMAND ${data.action} :: ${data.feedback}</li>`);
+                $(document).scrollTop($(document).height());
+            })
+            soc.on('setCookie', data =>{
+                Cookies.set(data.cookieName, data.cookieContents);
             })
         })
     </script>
