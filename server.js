@@ -38,10 +38,11 @@ io.on('connection', (socket) =>{
         users.push({id, username: socket.username});
     });
     socket.on('message', (data) => {
-        if({message}.substr(0,2) == "//"){
+        if(data.message.substr(0,2) == "//"){
             io.socket.emit('CMDmessage', {feedback: 'Test succeeded'});
+        } else{
+            io.sockets.emit('message', {message: data.message, username : socket.username});
         }
-        io.sockets.emit('message', {message: data.message, username : socket.username});
     });
     socket.on('disconnect', data =>{
         io.sockets.emit('left', {user: socket.username});
