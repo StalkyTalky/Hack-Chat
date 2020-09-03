@@ -18,7 +18,7 @@ Chatting
 
 chatting.
 
-Yeah, it's very clear I haven't worked out the details... but I will, soon™.
+Yeah, it's very clear I haven't worked out the details... but I will (probably not), soon™.
 
 ### Radio 📻 command
 
